@@ -1,5 +1,4 @@
 pipeline {
-
   environment {
     dockerimagename = "sasikanth777/nodejs"
     dockerImage = "node"
@@ -11,7 +10,8 @@ pipeline {
 
     stage('Checkout Source') {
       steps {
-        git 'https://github.com/sasikanth1531/jenkins-nodejs.git'
+        // Checkout the source code from the GitHub repository
+        git url: 'https://github.com/sasikanth1531/jenkins-nodejs.git'
       }
     }
 
@@ -25,8 +25,8 @@ pipeline {
 
     stage('Pushing Image') {
       environment {
-               registryCredential = 'dockerhublogin'
-           }
+        registryCredential = 'dockerhublogin'
+      }
       steps{
         script {
           docker.withRegistry( 'https://registry.hub.docker.com', registryCredential ) {
@@ -45,5 +45,4 @@ pipeline {
     }
 
   }
-
 }

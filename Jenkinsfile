@@ -1,8 +1,8 @@
 pipeline {
 
   environment {
-    dockerimagename = "thetips4you/nodeapp"
-    dockerImage = ""
+    dockerimagename = "sasikanth777/nodejs"
+    dockerImage = "node"
   }
 
   agent any
@@ -11,7 +11,7 @@ pipeline {
 
     stage('Checkout Source') {
       steps {
-        git 'https://github.com/shazforiot/nodeapp_test.git'
+        git 'https://github.com/sasikanth1531/jenkins-nodejs.git'
       }
     }
 

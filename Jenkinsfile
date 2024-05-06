@@ -1,13 +1,12 @@
 pipeline {
   environment {
-    dockerimagename = "sasikanth777/nodejs"
-    dockerImage = "node"
+    dockerImageName = "sasikanth777/nodejs" // Changed variable name to follow camelCase convention
+    registryCredential = 'dockerhublogin' // Moved registryCredential to the top-level environment block for consistency
   }
 
   agent any
 
   stages {
-
     stage('Checkout Source') {
       steps {
         // Checkout the source code from the GitHub repository
@@ -15,21 +14,20 @@ pipeline {
       }
     }
 
-    stage('Build image') {
-      steps{
+    stage('Build Image') {
+      steps {
         script {
-          dockerImage = docker.build dockerimagename
+          // Building Docker image
+          dockerImage = docker.build dockerImageName
         }
       }
     }
 
     stage('Pushing Image') {
-      environment {
-        registryCredential = 'dockerhublogin'
-      }
-      steps{
+      steps {
         script {
-          docker.withRegistry( 'https://registry.hub.docker.com', registryCredential ) {
+          // Pushing Docker image to Docker Hub registry
+          docker.withRegistry('https://registry.hub.docker.com', registryCredential) {
             dockerImage.push("latest")
           }
         }
@@ -39,10 +37,10 @@ pipeline {
     stage('Deploying App to Kubernetes') {
       steps {
         script {
+          // Deploying application to Kubernetes
           kubernetesDeploy(configs: "deploymentservice.yml", kubeconfigId: "kubernetes")
         }
       }
     }
-
   }
 }

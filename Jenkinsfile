@@ -1,46 +1,29 @@
 pipeline {
-  environment {
-    dockerImageName = "sasikanth777/nodejs" // Changed variable name to follow camelCase convention
-    registryCredential = 'dockerhublogin' // Moved registryCredential to the top-level environment block for consistency
-  }
+    agent any
 
-  agent any
-
-  stages {
-    stage('Checkout Source') {
-      steps {
-        // Checkout the source code from the GitHub repository
-        git url: 'https://github.com/sasikanth1531/jenkins-nodejs.git'
-      }
-    }
-
-    stage('Build Image') {
-      steps {
-        script {
-          // Building Docker image
-          dockerImage = docker.build dockerImageName
+    stages {
+        stage('Checkout') {
+            steps {
+                git 'https://github.com/sasikanth1531/nodejs-jenkins.git'
+            }
         }
-      }
-    }
-
-    stage('Pushing Image') {
-      steps {
-        script {
-          // Pushing Docker image to Docker Hub registry
-          docker.withRegistry('https://registry.hub.docker.com', registryCredential) {
-            dockerImage.push("latest")
-          }
+        
+        stage('Docker build and push') {
+            steps {
+                sh "docker build -t nodeapp:latest ."
+                
+                withCredentials([usernamePassword(credentialsId: 'docker_cred', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                    sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
+                    sh "docker tag nodeapp:latest sasikanth777/nodejs:v1"
+                    sh "docker push sasikanth777/nodejs:v1"
+                }
+            }
         }
-      }
-    }
 
-    stage('Deploying App to Kubernetes') {
-      steps {
-        script {
-          // Deploying application to Kubernetes
-          kubernetesDeploy(configs: "deploymentservice.yml", kubeconfigId: "kubernetes")
+        stage('Kubernetes deploy') {
+            steps {
+                sh 'kubernetesDeploy(configs: "deployment.yml", kubeconfigId: "kubernetes")'
+            }
         }
-      }
     }
-  }
 }
